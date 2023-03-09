@@ -1,0 +1,6 @@
+checkpoints/
+wandb/
+*.png
+*.out 
+__pycache__/
+*.ipynb
