@@ -48,3 +48,6 @@ python train.py
 
 
 # References
+1. [Skit-S2I: An Indian Accented Speech to Intent dataset](https://arxiv.org/abs/2212.13015)
+2. [Robust Speech Recognition via Large-Scale Weak Supervision](https://arxiv.org/abs/2212.04356) - [Pretrained model checkpoint](https://github.com/openai/whisper) 
+3. [A neural prosody encoder for end-ro-end dialogue act classification](https://arxiv.org/abs/2205.05590)
