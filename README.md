@@ -1,6 +1,6 @@
 # s2i-prosody
 This repository is the official implementation of the paper [Improving End-to-End SLU performance with Prosodic Attention and Distillation]() (accepted at Interspeech 2023). 
-<p align="center"><center><img src="imgs/method.png" width="50%"/></p>
+<p align="center"><img src="imgs/method.png" width="50%"/></p>
 
 **Abstract:**
 Most End-to-End SLU methods depend on the pretrained ASR or language model features for intent prediction. However, other essential information in speech, such as prosody, is often ignored. Recent research has shown improved results in classifying dialogue acts by incorporating prosodic information. The margins of improvement in these methods are minimal as the neural models ignore prosodic features. In this work, we propose prosody-attention, which uses the prosodic features differently to generate attention maps across time frames of the utterance. Then we propose prosody-distillation to explicitly learn the prosodic information in the acoustic encoder rather than concatenating the implicit prosodic features. Both the proposed methods improve the baseline results, and the prosody-distillation method gives an intent classification accuracy improvement of 8\% and 2\% on SLURP and STOP datasets over the prosody baseline.
