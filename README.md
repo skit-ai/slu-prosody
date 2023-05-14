@@ -1,5 +1,5 @@
 # s2i-prosody
-This repository is the official implementation of the paper [Improving End-to-End SLU performance with Prosodic Attention and Distillation]() (accepted at Interspeech 2023). 
+This repository is the official implementation of the paper [Improving End-to-End SLU performance with Prosodic Attention and Distillation]() (submitted at Interspeech 2023). 
 <p align="center"><img src="imgs/method.png" width="50%"/></p>
 
 **Abstract:**
@@ -16,8 +16,8 @@ conda create -n env_name --file requirements.txt
 conda activate env_name
 ```
 
-## Training and Evaluation
-Change the dataset, training method and training hyperparamerters in train.py.
+# Training and Evaluation
+Change the dataset, training method and training hyperparamerters in ```train.py```.
 
 Datasets:
 - SLURP
@@ -29,11 +29,14 @@ Training Methods:
 - Prosody-Attention
 - prosody-Distillation
 
+```train.py``` also returns the evaluation metrics after training.
+
 ```bash
 python train.py
 ```
 
-## Visualization of Attention Map
+# Visualization of Attention Map
+Code for visualization of the attention maps of the pretrained models are given in ```visualize_attention.ipynb```
 <p align="center"><img src="imgs/attentionmap.png" width="50%"/></p>
 
 # Results
@@ -45,7 +48,9 @@ python train.py
 
 
 # Citation
+```
 
+```
 
 # References
 1. [Skit-S2I: An Indian Accented Speech to Intent dataset](https://arxiv.org/abs/2212.13015)
