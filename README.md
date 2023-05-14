@@ -16,6 +16,17 @@ conda create -n env_name --file requirements.txt
 conda activate env_name
 ```
 
+
+To extract and save the prosodic features into ```.pt``` files, add the path to the original dataset after downloading in the scripts.
+```bash
+# SLURP Dataset
+python data_preparation/slurp.py
+
+# STOP Dataset
+python data_preparation/stop.py
+
+```
+
 # Training and Evaluation
 Change the dataset, training method and training hyperparamerters in ```train.py```.
 
@@ -56,3 +67,5 @@ Code for visualization of the attention maps of the pretrained models are given 
 1. [Skit-S2I: An Indian Accented Speech to Intent dataset](https://arxiv.org/abs/2212.13015)
 2. [Robust Speech Recognition via Large-Scale Weak Supervision](https://arxiv.org/abs/2212.04356) - [Pretrained model checkpoint](https://github.com/openai/whisper) 
 3. [A neural prosody encoder for end-ro-end dialogue act classification](https://arxiv.org/abs/2205.05590)
+4. [SLURP: A Spoken Language Understanding Resource Package](https://arxiv.org/abs/2011.13205)
+5. [STOP: A dataset for Spoken Task Oriented Semantic Parsing](https://arxiv.org/abs/2207.10643)
