@@ -5,7 +5,7 @@ import torch
 import whisper
 import numpy as np
 
-# ----------------------------------------------------------------------------------------------------------------------------
+
 class WhisperEncoder(nn.Module):
     def __init__(self,):
         super().__init__()
@@ -15,6 +15,8 @@ class WhisperEncoder(nn.Module):
 
     def forward(self, x):
         return self.encoder(x)
+
+
 
 class SelfAttentionPooling(nn.Module):
     """
@@ -43,27 +45,61 @@ class SelfAttentionPooling(nn.Module):
 
         return utter_rep, att_w
 
-
 # ----------------------------------------------------------------------------------------------------------------------------
 
 class WhisperBaselineModel(nn.Module):
     def __init__(self, feature_dim=512, n_class=56):
         super().__init__()
-        self.acoustic_encoder = WhisperEncoder()
+        self.encoder = WhisperEncoder()
 
         self.intent_classifier = nn.Sequential(
             nn.Linear(feature_dim, n_class),
         )
 
     def forward(self, x):
-        z = self.acoustic_encoder(x)
+        z = self.encoder(x)
         z = torch.mean(z, 1)
         intent = self.intent_classifier(z)
         return intent
 
 # ----------------------------------------------------------------------------------------------------------------------------
 
-class WhisperProsodyAttentionModel(nn.Module):
+class ProsodyBaselineModel(nn.Module):
+    def __init__(self, feature_dim=512, n_class=68):
+        super().__init__()
+        self.encoder = WhisperEncoder()
+
+        self.acoustic_proj = nn.Sequential(
+            nn.Linear(feature_dim, 128),
+            nn.ReLU(),
+        )
+        self.prosody_encoder = nn.Sequential(
+            nn.Conv1d(6, 128, 5,padding='same'),
+            nn.GELU(),
+            nn.Conv1d(128, 128, 5,padding='same'),
+            nn.GELU(),
+        )
+        self.rnn = nn.LSTM(256, 256, 2, batch_first=True, dropout=0.1)
+        self.intent_classifier = nn.Sequential(
+            nn.Linear(256, n_class),
+        )
+
+    def concat_fn(self, z, p):        
+        return torch.cat([z, p], dim=2)
+         
+    def forward(self, x, p):
+        z = self.encoder(x)
+        z = self.acoustic_proj(z)
+        p = self.prosody_encoder(p.transpose(1,2)).transpose(1,2)
+        z = self.concat_fn(z, p)
+        z = self.rnn(z)[0]
+        z = z[:, -1, :]
+        intent = self.intent_classifier(z)
+        return intent
+    
+
+# ----------------------------------------------------------------------------------------------------------------------------
+class ProsodyAttentionModel(nn.Module):
     def __init__(self, feature_dim=512, n_class=68):
         super().__init__()
         self.encoder = WhisperEncoder()
@@ -90,100 +126,9 @@ class WhisperProsodyAttentionModel(nn.Module):
         z = torch.sum(z * attn, dim=1)
         intent = self.intent_classifier(z)
         return intent, attn
-        # , attn
 
 # ----------------------------------------------------------------------------------------------------------------------------
-
-# class WhisperProsodyConcatModel(nn.Module):
-#     def __init__(self, feature_dim=512, n_class=68):
-#         super().__init__()
-#         self.encoder = WhisperEncoder()
-
-#         self.acoustic_proj = nn.Sequential(
-#             nn.Linear(feature_dim, 128),
-#             nn.ReLU(),
-#         )
-
-#         self.prosody_encoder = nn.Sequential(
-#             nn.Conv1d(6, 128, 5,padding='same'),
-#             nn.GELU(),
-#             nn.Conv1d(128, 128, 5,padding='same'),
-#             nn.GELU(),
-#             nn.Conv1d(128, 128, 5,padding='same'),
-#             nn.GELU(),
-#         )
-
-#         encoder_layer = nn.TransformerEncoderLayer(d_model=256, nhead=4)
-#         self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=2)
-#         self.self_attn = SelfAttentionPooling(256)
-
-#         self.intent_classifier = nn.Sequential(
-#             nn.Linear(256, n_class),
-#         )
-
-#     def concat_fn(self, z, p):
-#         return torch.cat([z, p], dim=2)
-         
-#     def forward(self, x, p):
-#         z = self.encoder(x)
-#         z = self.acoustic_proj(z)
-#         p = self.prosody_encoder(p.transpose(1,2)).transpose(1,2)
-#         z = self.concat_fn(z, p)
-#         z =  self.transformer_encoder(z)
-#         z, _ = self.self_attn(z)
-#         intent = self.intent_classifier(z)
-#         return intent
-
-class WhisperProsodyConcatModel(nn.Module):
-    def __init__(self, feature_dim=512, n_class=68):
-        super().__init__()
-        self.encoder = WhisperEncoder()
-
-        self.acoustic_proj = nn.Sequential(
-            nn.Linear(feature_dim, 128),
-            nn.ReLU(),
-        )
-
-        self.prosody_encoder = nn.Sequential(
-            nn.Conv1d(6, 128, 5,padding='same'),
-            nn.GELU(),
-            nn.Conv1d(128, 128, 5,padding='same'),
-            nn.GELU(),
-            # nn.Conv1d(128, 128, 5,padding='same'),
-            # nn.GELU(),
-        )
-
-        # encoder_layer = nn.TransformerEncoderLayer(d_model=256, nhead=4)
-        self.rnn = nn.LSTM(256, 256, 2, batch_first=True, dropout=0.1)
-        # self.self_attn = SelfAttentionPooling(6)
-
-        self.intent_classifier = nn.Sequential(
-            nn.Linear(256, n_class),
-        )
-
-    def concat_fn(self, z, p):        
-        return torch.cat([z, p], dim=2)
-         
-    def forward(self, x, p):
-        # p -> 1s -> (B, 50, 6)
-        # x -> 1s -> (B, 50, 512)
-
-        # _, attn_w = self.self_attn(p)
-
-        z = self.encoder(x)
-        z = self.acoustic_proj(z)
-        p = self.prosody_encoder(p.transpose(1,2)).transpose(1,2)
-        z = self.concat_fn(z, p)
-        z = self.rnn(z)[0]
-        
-        # z = torch.sum(z * attn_w, dim=1)
-        z = z[:, -1, :]
-        intent = self.intent_classifier(z)
-        return intent
-
-# ----------------------------------------------------------------------------------------------------------------------------
-
-class WhisperProsodyDistillationModel(nn.Module):
+class ProsodyDistillationModel(nn.Module):
     def __init__(self, feature_dim=512, n_class=56):
         super().__init__()
         self.encoder = WhisperEncoder()
@@ -223,6 +168,4 @@ class WhisperProsodyDistillationModel(nn.Module):
         intent_z = self.z_intent_classifier(z)
                
         return intent_p, intent_z, z, zp, z_attn, zp_zttn
-        # return intent_p, intent_z, z.mean(1), zp.mean(1), z_attn, zp_zttn
-
-# ----------------------------------------------------------------------------------------------------------------------------
+    

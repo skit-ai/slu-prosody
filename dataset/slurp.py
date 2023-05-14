@@ -8,7 +8,41 @@ import torchaudio
 import whisper
 import numpy as np
 
-# -----------------------------------------------------------------------------------------------------------
+def get_prosody_dataloaders(batch_size=16, n_workers=5):
+    train_dataset = SLURPProsodyDataset(
+            "/root/Speech2Intent/Datasets/SLURP/prosody/train"
+        )
+
+    val_dataset = SLURPProsodyDataset(
+        "/root/Speech2Intent/Datasets/SLURP/prosody/dev"
+    )
+
+    trainloader = torch.utils.data.DataLoader(
+            train_dataset, 
+            batch_size=batch_size, 
+            shuffle=True, 
+            num_workers=n_workers,
+            collate_fn = train_dataset.collate_fn,
+        )
+    
+    valloader = torch.utils.data.DataLoader(
+            val_dataset, 
+            batch_size=batch_size, 
+            num_workers=n_workers,
+            collate_fn = train_dataset.collate_fn,
+        )
+
+    test_dataset = SLURPProsodyDataset(
+            "/root/Speech2Intent/Datasets/SLURP/prosody/test"
+        )
+    testloader = torch.utils.data.DataLoader(
+            test_dataset, 
+            batch_size=1, 
+            num_workers=n_workers,
+            collate_fn = train_dataset.collate_fn,
+        )
+    
+    return trainloader, valloader, testloader
 
 class SLURPProsodyDataset(torch.utils.data.Dataset):
     def __init__(self, dir_path):
@@ -31,7 +65,6 @@ class SLURPProsodyDataset(torch.utils.data.Dataset):
         wav_path = d["wav_path"]
         pitch = d["pitch"]
         intent_class = d["intent_class"]
-        intent_str = d["intent_str"]
 
         wav_tensor, _= torchaudio.load(wav_path)
         wav_tensor = whisper.pad_or_trim(wav_tensor.flatten(), 16000*self.t)
@@ -83,9 +116,7 @@ class SLURPProsodyDataset(torch.utils.data.Dataset):
         e3[mask] = 0
 
         prosodic_features = torch.cat([p1.view(-1, 1), p2.view(-1, 1), p3.view(-1, 1), e1.view(-1, 1), e2.view(-1, 1), e3.view(-1, 1)], 1)
-        # prosodic_features = torch.cat([p1.view(-1, 1), p2.view(-1, 1), p3.view(-1, 1)], 1)
-        # prosodic_features = torch.cat([e1.view(-1, 1), e2.view(-1, 1), e3.view(-1, 1)], 1)
-        return mel, prosodic_features, intent_class, wav_path, intent_str
+        return mel, prosodic_features, intent_class
 
     def collate_fn(self, batch):
         (seq, prosody, label) = zip(*batch)
