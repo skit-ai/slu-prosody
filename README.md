@@ -1,5 +1,5 @@
 # s2i-prosody
-This repository is the official implementation of the paper [Improving End-to-End SLU performance with Prosodic Attention and Distillation]() (submitted at Interspeech 2023). 
+This repository is the official implementation of the paper [Improving End-to-End SLU performance with Prosodic Attention and Distillation](https://arxiv.org/abs/2305.08067) (submitted at Interspeech 2023). 
 <p align="center"><img src="imgs/method.png" width="50%"/></p>
 
 **Abstract:**
@@ -60,7 +60,14 @@ Code for visualization of the attention maps of the pretrained models are given 
 
 # Citation
 ```
-
+@misc{rajaa2023improving,
+      title={Improving End-to-End SLU performance with Prosodic Attention and Distillation}, 
+      author={Shangeth Rajaa},
+      year={2023},
+      eprint={2305.08067},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
+}
 ```
 
 # References
