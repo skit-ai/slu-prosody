@@ -1,5 +1,5 @@
 # s2i-prosody
-This repository is the official implementation of the paper [Improving End-to-End SLU performance with Prosodic Attention and Distillation](https://arxiv.org/abs/2305.08067) (submitted at Interspeech 2023). 
+This repository is the official implementation of the paper [Improving End-to-End SLU performance with Prosodic Attention and Distillation](https://arxiv.org/abs/2305.08067) (accepted at Interspeech 2023). 
 <p align="center"><img src="imgs/method.png" width="50%"/></p>
 
 **Abstract:**
